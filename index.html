@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>仁和会计 · 小红书爆款内容生成器</title>
+<style>
+  :root {
+    --red: #D4303E;
+    --red-light: #FFF0F2;
+    --gold: #C8993C;
+    --gold-light: #FFF8EC;
+    --blue: #2563EB;
+    --blue-light: #EFF6FF;
+    --green: #059669;
+    --green-light: #ECFDF5;
+    --bg: #FFFFFF;
+    --card: #FFFFFF;
+    --text: #1A1A1A;
+    --text-secondary: #666;
+    --text-muted: #999;
+    --border: #EAEAEA;
+    --shadow: 0 2px 20px rgba(0,0,0,0.06);
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  ::-webkit-scrollbar, ::-webkit-scrollbar-thumb, ::-webkit-scrollbar-track { display: none !important; width: 0 !important; height: 0 !important; background: transparent !important; }
+  body { overflow-y: auto; overflow-x: hidden; touch-action: pan-y;
+    position: relative; width: 100%; max-width: 100vw;
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.7; min-height: 100vh;
+    scrollbar-width: none; -ms-overflow-style: none;
+  }
+  .container { max-width: 860px; width: 100%; margin: 0 auto; padding: 0 16px 30px; touch-action: pan-y; }
+
+  /* Header */
+  .header {
+    text-align: center;
+    background: linear-gradient(180deg, #FFF5F5 0%, #FEF2F3 40%, var(--bg) 100%);
+    padding: 32px 24px 24px; margin-bottom: 4px;
+    touch-action: pan-y;
+  }
+  .header .brand { font-size: 62px; font-weight: 900; color: var(--red); letter-spacing: 4px; line-height: 1.1; }
+  .header h1 { font-family: -apple-system, "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif; font-size: 36px; font-weight: 900; margin-top: 10px; color: var(--text); letter-spacing: 1px; }
+  .header .sub { font-size: 16px; color: var(--text-muted); margin-top: 10px; font-weight: 400; }
+
+  /* Cards */
+  .card {
+    background: var(--card); border-radius: var(--radius); padding: 28px 30px;
+    margin-bottom: 20px; box-shadow: var(--shadow); border: 1px solid var(--border);
+    overflow: hidden; touch-action: pan-y;
+  }
+  .card-title { font-size: 24px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+  .card-title .badge { font-size: 10px; padding: 3px 10px; border-radius: 3px 3px 3px 10px; font-weight: 700; letter-spacing: .5px; }
+  .badge-red { background: var(--red); color: #fff; }
+  .badge-gold { background: var(--gold-light); color: var(--gold); }
+  .badge-blue { background: var(--blue-light); color: var(--blue); }
+
+  /* Input Grid */
+  .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .input-grid.full { grid-template-columns: 1fr; }
+  @media (max-width: 600px) { .input-grid { grid-template-columns: 1fr; } }
+
+  label { display: block; font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+  select, input, textarea {
+    width: 100%; font-size: 14px; font-weight: 400; color: var(--text-secondary); padding: 10px 14px; border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm); font-size: 14px; font-family: inherit;
+    color: var(--text); background: #FAFAFA; transition: all .2s; outline: none;
+    -webkit-appearance: none; appearance: none;
+    resize: vertical;
+  }
+  select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+  select:focus, input:focus, textarea:focus { border-color: var(--red); background: #fff; box-shadow: 0 0 0 3px var(--red-light); }
+
+  .tag-group { display: flex; flex-wrap: wrap; gap: 7px; }
+  .tag-btn {
+    padding: 7px 15px; border: 1.5px solid var(--border); border-radius: 20px;
+    font-size: 13px; cursor: pointer; background: #FAFAFA; transition: all .2s; user-select: none;
+    white-space: nowrap;
+  }
+  .tag-btn:hover { border-color: var(--red); }
+  .tag-btn.selected { background: var(--red-light); border-color: var(--red); color: var(--red); font-weight: 600; }
+
+  .btn-generate {
+    width: 100%; padding: 20px; background: linear-gradient(135deg, var(--red), #E85D6A);
+    color: #fff; border: none; border-radius: var(--radius-sm); font-size: 19px;
+    font-weight: 700; cursor: pointer; margin-top: 10px; transition: all .25s; letter-spacing: 1px;
+  }
+  .btn-generate:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(212,48,62,.3); }
+  .btn-generate:disabled { opacity: .55; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  /* Output */
+  .output { display: none; }
+  .output.show { display: block; }
+
+  .result-card {
+    background: var(--card); border-radius: var(--radius); padding: 36px 30px;
+    margin-bottom: 28px; box-shadow: var(--shadow); border: 1px solid var(--border);
+    overflow: hidden; touch-action: pan-y;
+  }
+  .result-card .r-title { font-size: 22px; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; }
+
+  .btn-copy {
+    display: inline-flex; align-items: center; gap: 4px; padding: 5px 12px;
+    border: 1px solid var(--border); border-radius: 6px; font-size: 12px;
+    background: #fff; cursor: pointer; color: var(--text-secondary); transition: all .2s;
+  }
+  .btn-copy:hover { border-color: var(--red); color: var(--red); }
+  .btn-copy.copied { background: #ECFDF5; border-color: var(--green); color: var(--green); }
+
+  /* Title items */
+  .title-block { margin-bottom: 10px; }
+  .title-block .formula-label {
+    display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px;
+    border-radius: 4px; margin-bottom: 4px;
+  }
+  .fl-1 { background: #FFE0E5; color: #D4303E; }
+  .fl-2 { background: #FFF3E0; color: #E65100; }
+  .fl-3 { background: #E8F5E9; color: #2E7D32; }
+  .fl-4 { background: #E3F2FD; color: #1565C0; }
+  .fl-5 { background: #F3E5F5; color: #7B1FA2; }
+  .fl-6 { background: #FFF8E1; color: #F57F17; }
+  .fl-7 { background: #E0F7FA; color: #00838F; }
+  .title-block .t-text {
+    font-size: 18px; font-weight: 600; display: block; padding: 10px 14px;
+    background: #FAFAFA; border-radius: 6px; border: 1px solid var(--border);
+    cursor: pointer; transition: all .15s; word-break: break-word;
+  }
+  .title-block .t-text:hover { background: var(--red-light); border-color: var(--red); }
+
+  /* Body */
+  .body-preview { touch-action: pan-y;
+    background: #FDFDFD; border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 18px; white-space: pre-wrap; word-break: break-all; overflow-wrap: anywhere; font-size: 16px; line-height: 1.8;
+    max-height: 660px; overflow-y: auto; overflow-x: hidden; font-family: inherit;
+    scrollbar-width: none; -ms-overflow-style: none;
+  }
+  .highlight { background: #FFF3CD; padding: 1px 4px; border-radius: 2px; }
+
+  /* Tags */
+  .tag-row { display: flex; flex-wrap: wrap; gap: 7px; margin: 8px 0 4px; }
+  .tag-chip {
+    padding: 7px 16px; border-radius: 16px; font-size: 14px; font-weight: 500;
+    background: var(--red-light); color: var(--red);
+    word-break: break-word; overflow-wrap: break-word;
+  }
+  .tag-chip.hot { background: #FFF3E0; color: #E65100; }
+  .tag-chip.local { background: var(--blue-light); color: var(--blue); }
+  .tag-chip.long { background: var(--green-light); color: var(--green); }
+
+  .tag-label { font-size: 11px; font-weight: 700; color: var(--text-muted); margin: 10px 0 4px; text-transform: uppercase; letter-spacing: .5px; }
+
+  /* Conversion tips */
+  .conv-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  @media (max-width: 600px) { .conv-row { grid-template-columns: 1fr; } }
+  .conv-item { overflow: hidden;
+    background: #FAFAFA; border-radius: var(--radius-sm); padding: 18px 20px;
+    border: 1px solid var(--border); font-size: 16px; cursor: pointer; transition: all .15s;
+    word-break: break-word; overflow-wrap: break-word;
+  }
+  .conv-item:hover { background: var(--red-light); border-color: var(--red); }
+  .conv-item .cv-label { font-size: 11px; font-weight: 700; color: var(--red); margin-bottom: 4px; }
+
+  /* Quality Checklist */
+  .checklist { list-style: none; padding: 0; }
+  .checklist li {
+    padding: 3px 0 3px 2px; font-size: 12px; color: var(--text-secondary); line-height: 1.5;
+    word-break: break-word; overflow-wrap: break-word;
+  }
+  .checklist li::before { content: "▪"; font-size: 10px; color: var(--text-muted); }
+
+  /* btn group */
+  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; padding: 10px 0; }
+
+  /* Tip card */
+  .tip-card {
+    display: flex; align-items: flex-start; gap: 10px;
+    background: linear-gradient(135deg, #FFF8EC, #FFF3E0);
+    border-radius: 10px; padding: 14px 16px; margin: 10px 0 0;
+    border: 1px solid #F5D69F;
+  }
+  .tip-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .tip-text { font-size: 13px; color: #8B6914; line-height: 1.6; word-break: break-word; overflow-wrap: break-word; }
+  .btn-outline {
+    padding: 10px 20px; border: 1.5px solid var(--red); border-radius: 6px;
+    background: #fff; color: var(--red); font-size: 14px; font-weight: 600; cursor: pointer;
+    transition: all .2s;
+  }
+  .btn-outline:hover { background: var(--red-light); }
+  .btn-primary {
+    padding: 10px 20px; background: var(--red); color: #fff; border: none;
+    border-radius: 6px; font-size: 14px; font-weight: 700; cursor: pointer; transition: all .2s;
+  }
+  .btn-primary:hover { background: #C02030; }
+  .btn-primary.copied { background: var(--green); }
+
+  /* Toast */
+  .toast {
+    position: fixed; top: 90px; left: 50%; transform: translateX(-50%);
+    background: #1A1A1A; color: #fff; padding: 12px 28px; border-radius: 24px;
+    font-size: 15px; z-index: 99999; opacity: 0; transition: opacity .3s; 
+    pointer-events: none; box-shadow: 0 4px 20px rgba(0,0,0,.3);
+    max-width: 90vw;
+  }
+  .toast.show { opacity: 1; }
+
+  .loading { display: none; text-align: center; padding: 24px; color: var(--text-secondary); }
+
+  .footer { text-align: center; padding: 30px 0 20px; color: var(--text-muted); font-size: 12px; word-break: break-word; overflow-wrap: break-word; }
+
+  /* Mobile optimization */
+  @media (max-width: 480px) {
+    .container { padding: 0 12px 40px; }
+    .header { padding: 24px 14px 16px; margin: 0; border-radius: 0 0 16px 16px; }
+    .header .brand { font-size: 26px; }
+    .header h1 { font-size: 18px; }
+    .header .sub { font-size: 11px; line-height: 1.5; padding: 0 8px; word-break: break-word; }
+    .card, .result-card { padding: 16px 14px; margin: 0 0 12px; border-radius: 12px; overflow-x: hidden; touch-action: pan-y; }
+    .card-title { font-size: 15px; margin-bottom: 12px; word-break: break-word; }
+    .input-grid { gap: 10px; }
+    label { font-size: 12px; margin-bottom: 4px; }
+    select, input, textarea { padding: 11px 12px; font-size: 15px; word-break: break-word; }
+    select { padding-right: 34px; }
+    .tag-btn { padding: 7px 13px; font-size: 13px; }
+    .btn-generate { padding: 16px; font-size: 15px; margin-top: 8px; }
+    .result-card .r-title { font-size: 14px; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; word-break: break-word; }
+    .btn-copy { padding: 4px 10px; font-size: 11px; flex-shrink: 0; }
+    .title-block .formula-label { font-size: 10px; flex-shrink: 0; }
+    .title-block .t-text { font-size: 14px; padding: 10px 12px; word-break: break-word; }
+    .body-preview { touch-action: pan-y; padding: 14px; font-size: 15px; line-height: 1.7;  overflow-x: hidden; word-break: break-all; overflow-wrap: anywhere; }
+    .tag-chip { padding: 5px 11px; font-size: 12px; word-break: break-word; }
+    .conv-item { padding: 10px 12px; font-size: 12px; word-break: break-word; }
+    .btn-outline, .btn-primary { padding: 10px 16px; font-size: 13px; white-space: nowrap; }
+    .toast { font-size: 13px; padding: 8px 16px; max-width: 90vw; }
+    .tip-card { padding: 12px 14px; margin: 8px 0 0; }
+    .tip-text { font-size: 12px; }
+    .footer { padding: 20px 16px; }
+  }
+  @media (max-width: 360px) {
+    .header .brand { font-size: 24px; }
+    .header h1 { font-size: 16px; }
+    .tag-btn { padding: 6px 11px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="brand">仁和会计</div>
+    <h1>小红书爆款内容生成器</h1>
+    <div class="sub">7大标题公式 · 8大内容模板 · 200校区矩阵运营定制版</div>
+  </div>
+
+  <!-- Input Card -->
+  <div class="card">
+    <div class="card-title">
+      <span>⚙️</span> 生成设置
+      <span class="badge badge-red">校区版</span>
+    </div>
+
+    <div class="input-grid full">
+      <div>
+        <label>校区所在城市</label>
+        <input type="text" id="city" placeholder="例如：武汉" value="" required>
+      </div>
+    </div>
+
+    <div class="input-grid full" style="margin-top:24px;">
+      <div>
+        <label>内容模板类型</label>
+        <select id="templateType">
+          <option value="shicao">🔧 实操技能</option>
+          <option value="zhuanhang">🔄 转行就业</option>
+          <option value="lingjichu">🌱 零基础入门</option>
+          <option value="ketang">🏫 课堂实拍</option>
+          <option value="zhaopin" selected>📋 本地招聘</option>
+          <option value="mianshi">💬 求职面试</option>
+          <option value="kaozheng">📚 考证备考</option>
+          <option value="boss">👔 老板财税</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="input-grid full" style="margin-top:24px;">
+      <div>
+        <label>自定义补充信息（选填）</label>
+        <textarea id="extraInfo" rows="4" placeholder="例如：初级刚考完、月底结账、中级最后60天冲刺、本校区最近有试听课..."></textarea>
+      </div>
+    </div>
+
+    <button class="btn-generate" id="btnGen" onclick="generate()">
+      🚀 生成校区版小红书笔记
+    </button>
+  </div>
+
+  <div class="loading" id="loading">
+    <span>正在调用爆款公式生成中...</span>
+  </div>
+
+  <!-- Output -->
+  <div class="output" id="output">
+
+    <!-- Title Card -->
+    <div class="result-card" id="titleCard">
+      <div class="r-title">
+        <span>🔥 爆款标题</span>
+        <button class="btn-copy" onclick="copySection('titleCard')">📋 复制全部标题</button>
+      </div>
+      <div style="font-size:11px;color:var(--text-muted);margin:-8px 0 12px;">7种公式 · 话题100%对齐正文</div>
+      <div id="titleOutput"></div>
+    </div>
+
+    <!-- Body Card -->
+    <div class="result-card" id="bodyCard">
+      <div class="r-title">
+        <span>📝 正文内容（含本地化+获客钩子）</span>
+        <button class="btn-copy" onclick="copyBody()">📋 复制正文</button>
+      </div>
+      <div class="body-preview" id="bodyOutput"></div>
+    </div>
+
+    <!-- Tags Card -->
+    <div class="result-card" id="tagCard">
+      <div class="r-title">
+        <span>🏷️ 话题标签</span>
+        <button class="btn-copy" onclick="copyTags()">📋 复制标签</button>
+      </div>
+      <div id="tagOutput"></div>
+    </div>
+
+    <!-- Conversion Tips -->
+    <div class="result-card" id="convCard">
+      <div class="r-title">
+        <span>💬 评论区置顶话术参考</span>
+        <span class="badge badge-gold">合规安全</span>
+      </div>
+      <div class="conv-row" id="convOutput"></div>
+    </div>
+
+    <!-- Deploy Checklist -->
+    <div class="result-card" id="checkCard">
+      <div class="r-title">
+        <span>✅ 发布前自查清单</span>
+        <span class="badge badge-blue">7项检查</span>
+      </div>
+      <ul class="checklist" id="checklistOutput"></ul>
+    </div>
+
+    <!-- Buttons -->
+    <div class="btn-row">
+      <button class="btn-outline" onclick="generate()" style="width:100%; padding:14px; font-size:16px; background:#FFF8F5; border-color:#F5D0C0;">🔄 换一批内容</button>
+    </div>
+
+    <!-- Tip Card -->
+    <div class="tip-card">
+      <div class="tip-icon">💡</div>
+      <div class="tip-text">图片生成路径：先从上面选一个标题，复制发给豆包+胡老师的提示词，就有笔记图片啦！还不会？快去企微找胡晓娟～</div>
+    </div>
+  </div>
+
+  <div class="footer" style="padding:16px 0 8px;">
+    <div>仁和会计 · 小红书爆款内容生成器</div>
+    <div style="margin-top:6px; font-size:11px; color:#bbb;">目标群体：零基础小白 · 有证没经验 · 宝妈转行 · 30+转行 · 在职提升</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============ DATA ============
+
+// 统一内容库：每个变体 = 1篇正文 + 7条匹配标题（7公式各1条），正文标题100%对齐
+const contentLibrary = {
+  shicao: [
+    {  // 做账全流程
+      topic: "做账全流程",
+      body: function(city, aud) {
+        return `在${city}做会计培训这些年，被问最多的问题之一就是：做账到底怎么学？💡\n\n很多刚入行的${aud}，最容易卡在做账流程上。网上的教程要么太理论看不懂，要么太零碎不成体系，看完还是一头雾水。其实做账是有固定的流程的，只要你按顺序走一遍，就会发现没你想的那么复杂。\n\n今天就把做账全流程一次讲清楚👇\n\n第一步，拿到原始票据先分类。发票、收据、银行回单、工资表各归各类。这一步看起来简单，但很多人乱堆一气，到后面想找一张票翻半天。分类做好了，后面效率高一倍。\n\n第二步，审核票据。金额对不对、抬头对不对、日期在不在范围内，三个缺一不可。尤其是发票的纳税人识别号，少一位都不行。\n\n第三步，录入凭证。借什么贷什么，分录的逻辑要清楚。新手最容易在这一步出错，建议先用草稿纸画一遍借贷方向，确认无误再录系统。记住铁律：有借必有贷，借贷必相等。\n\n第四步，登记账簿。总账和明细账要平行登记，金额必须完全一致。月底对账的时候，差一分钱都要翻回去找原因。\n\n第五步，编制报表。利润表、资产负债表从账簿数据生成，最后核对勾稽关系。报表不平就是前面某一步出错了。\n\n在${city}做会计培训这么多年，见过太多${aud}从完全不敢下手到独立做完一套账。你差的不是能力，是有人告诉你第一步往哪走。`;
+      },
+            titles: {
+        f1: '会计小白必看，手把手教你做账全流程🔥',
+        f2: '做账就5步，新手存下这篇反复看',
+        f3: '说实话，做账真的没有你想象的那么难',
+        f4: '月底结账前！先把做账流程理顺别踩坑',
+        f5: '学员分享做完一套账下来直接就通了',
+        f6: '做账最容易犯的3个错，新手提前知道',
+        f7: '做账流程你卡在哪一步？',
+      }
+    },
+    {  // 报税流程
+      topic: "报税流程",
+      body: function(city, aud) {
+        return `报税流程这个东西，零基础特别容易搞混。今天用大白话讲清楚👇\n\n很多${aud}一听到报税就头疼，什么增值税、企业所得税、个人所得税，名字都绕口。其实报税的核心逻辑就三步：算税→填表→申报。\n\n第一步算税：搞清楚你企业这个月要交什么税。增值税看销售额（一般纳税人看进项销项差额），企业所得税看利润，个税看工资。每个税有固定的公式，不需要自己发明。\n\n第二步填表：登录电子税务局，找到对应的申报表，把算好的数据填进去。现在系统已经很智能了，哪里填错了会有红色提示，照着改就行。\n\n第三步申报：确认无误后提交，页面会显示申报成功。记得在每月15号之前完成，逾期有滞纳金，而且会影响企业纳税信用等级。\n\n实操中最容易踩的坑：发票认证晚了导致进项不能抵扣、申报表种类选错了、小规模纳税人忘记零申报也要按时报。这几个坑${aud}一定要记在心里。\n\n在${city}教了这么多年，大部分学员上了一轮实操课之后，报税就不再是什么可怕的事情了。就是熟练工，多做几次就顺了。`;
+      },
+            titles: {
+        f1: '报税流程大白话，30秒给你讲明白',
+        f2: '报税就3步走，新手看这一篇就够了',
+        f3: '说实话，报税真不用头疼，看看就会',
+        f4: '每月15号前！报税流程走一遍不逾期',
+        f5: '她第一次独立报税，比想象中简单太！多！了！',
+        f6: '报税容易逾期的3个时间点，记下来',
+        f7: '第一次独立报税你紧张吗？',
+      }
+    },
+    {  // 会计分录
+      topic: "会计分录",
+      body: function(city, aud) {
+        return `会计分录是会计的基本功，但很多${aud}一开始就背晕了。几十个科目、借贷方向，死记硬背真的记不住。今天换个方法讲👇\n\n先记一个核心规则，所有分录都从这个规则出发：有借必有贷，借贷必相等。每次做分录，先想清楚哪个科目增加、哪个减少，然后套规则。\n\n然后记住一句口诀：资成费借增贷减，负所收借减贷增。\n\n翻译成人话：资产类、成本类、费用类科目，增加记借方，减少记贷方。负债类、所有者权益类、收入类科目正好反过来，增加记贷方，减少记借方。\n\n举个例子：销售收入存入银行10万。银行存款是资产类，增加了10万→记借方。主营业务收入是收入类，增加了10万→记贷方。分录就是：借银行存款100000，贷主营业务收入100000。就这么简单。\n\n再举个例子：用银行存款支付办公费5000。银行存款减少→记贷方。管理费用增加→记借方。分录：借管理费用5000，贷银行存款5000。\n\n在${city}校区教分录这么多年，发现${aud}一旦理解了逻辑而不是死记硬背，进步就特别快。分录通了，做账就通了。`;
+      },
+            titles: {
+        f1: '会计分录大白话|不允许你还搞不懂',
+        f2: '10个必会分录，存起来有空就刷一遍',
+        f3: '说实话，分录背不下来不是笨，是方法错了',
+        f4: '入职前！先把这20个高频分录练到手熟',
+        f5: '练了50遍分录后，她再也不怕做账了',
+        f6: '分录借贷老搞反？新手最容易栽在这了',
+        f7: '分录记不住怎么办？',
+      }
+    },
+    {  // 财务软件操作
+      topic: "财务软件操作",
+      body: function(city, aud) {
+        return `很多${aud}学会计的时候，最忽略的一块就是财务软件操作。理论学得再好，上了岗不会用软件还是白搭\n\n现在企业用得最多的就是用友和金蝶，两个软件的逻辑其实差不多。会用一个，另一个上手很快。零基础学财务软件，不用怕界面复杂，核心就那么几个模块\n\n总账模块：这是最常用的。从录入凭证到期末结转，日常做账都在这里完成。新手重点练凭证录入和审核，这是每天都要做的事\n\n报表模块：一键生成资产负债表和利润表。但别只会点按钮，要知道数字从哪来的，不然报表不平你都不知道哪出了问题\n\n固定资产模块：登记资产、计提折旧。小公司可能手动做，中大公司都用模块管理\n\n税务模块：现在很多软件都对接了电子税务局，可以直接在软件里申报，不用再登录税务局网站了\n\n在${city}校区的实操课，财务软件是必练项目。学员从打开软件到独立做完一套账，一般两到三次课就能上手。关键是多练，光看不练永远学不会。软件操作就是肌肉记忆，做多了自然就熟了`;
+      },
+      titles: {
+        f1: '财务软件操作｜用友和金蝶其实就一回事',
+        f2: '财务软件4大模块，练好这些面试不虚',
+        f3: '不会用财务软件比没证更吃亏，实话',
+        f4: '入职前！先把财务软件练熟，面试真不一样',
+        f5: '练了3天用友，面试直接过，她的经历',
+        f6: '会用财务软件的，起薪真的高1000+',
+        f7: '你第一份工作用的什么财务软件？',
+      }
+    }
+  ],
+  zhuanhang: [
+    {  // 转行路线规划
+      topic: "转行路线规划",
+      body: function(city, aud) {
+        return `昨天有个学员来校区找我，说想做会计但不知道从哪开始。我特别理解这种心情，因为很多${aud}最开始都是同一个状态：犹豫、害怕、不知道行不行。\n\n先说结论：转行做会计，年龄不是障碍，零基础也不是障碍。最大的障碍是一开始不知道往哪走，然后就一直停留在"想"的阶段。\n\n我带过35岁的宝妈，在家带了5年孩子，现在在一家公司做费用会计，月薪6000+。带过40岁的文员，之前只会用Word和Excel，现在独立负责公司的全盘账。还带过28岁的销售，厌倦了天天打电话，转行做了会计助理，一年后升了会计。他们的共同点只有一个：走对了路线。\n\n转行会计的正确路线👇\n\n第一步：先去了解会计到底做什么。不是坐在那打算盘，是从审核票据→做凭证→记账→出报表→报税，一个完整的流程。建议来校区试听一节实操课，真实感受一下。\n\n第二步：学实操而不是只考证。很多机构让你先考证再学实操，但会计这个职业，证书是加分项，实操是保命项。面试的时候，你说"我能独立做账"比"我有初级证书"有用十倍。\n\n第三步：选一个入口岗位先入行。会计助理、出纳、费用会计，门槛都不高，先进去积累半年到一年经验，再往全盘会计走。\n\n在${city}，见过太多${aud}从完全不自信到独立上岗。你差的不是能力，是一个对的起点。`;
+      },
+            titles: {
+        f1: '假如你从零开始转行会计，路线在这',
+        f2: '转行做会计，这3步顺序千万别搞反',
+        f3: '30岁转行做会计，真的一点都不晚',
+        f4: '7月开始学会计，年前刚好能入职！',
+        f5: '35岁宝妈转行会计，半年就上岗了',
+        f6: '转行前先算清这3笔账，不然后悔',
+        f7: '转行做会计，你最大的顾虑是什么？',
+      }
+    },
+    {  // 转行正确顺序
+      topic: "转行正确顺序",
+      body: function(city, aud) {
+        return `在${city}，想转行做会计的人越来越多。但很多人第一步就走错了：先花几千块报班考证，考完发现还是不会做账，又花钱学实操，时间和钱都浪费了。\n\n考证不是错的，但顺序错了。正确的顺序是：先了解→再体验→再决定学不学，然后考证和实操一起走。\n\n为什么？因为会计这个职业跟你想象的可能很不一样。它不是很难的数学，不需要多高的学历，不需要多聪明。它需要的是细心、耐心、对规则的理解力。一个高中毕业的宝妈，只要认真学，三个月就能上手做账。\n\n给${aud}的三点建议👇\n\n第一，不要被"零基础""数学差""年龄大"这些标签困住自己。我带过的学员里，数学最差的那个现在是全盘会计——因为真正需要算的东西，Excel和财务软件都帮你算好了。\n\n第二，先来试一节课。坐在教室里，看看老师怎么做账，自己动手试一试。比你躺在床上想半年有用一万倍。\n\n第三，转行会计最适合有生活阅历的人。宝妈懂细心、销售懂沟通、文员有办公软件基础——这些都是做会计的天然优势，不是劣势。\n\n在${city}，想了解会计入门的，跟我聊·聊你的情况，帮你看看适合什么路线。`;
+      },
+            titles: {
+        f1: '宝妈转行会计，这条路我见过太多人走通了',
+        f2: '宝妈转行，先做好这3件事再开始',
+        f3: '带娃几年后重返职场，真的可以',
+        f4: '暑假后想上班？先学会计基础再出发',
+        f5: '带娃3年后转行会计，现在月入翻倍了',
+        f6: '宝妈做会计的优势，很多人根本想不到',
+        f7: '带娃+上班，你最担心什么？',
+      }
+    },
+    {  // 破除转行恐惧
+      topic: "破除转行恐惧",
+      body: function(city, aud) {
+        return `给${aud}的几句大实话👇\n\n很多人不敢转行，是因为脑子里总有个声音在说：我都这个年纪了，从头学一个职业来得及吗？\n\n来得及。会计这个职业有个非常特别的地方：它不是吃青春饭的，是越老越值钱的。30岁转行，干到55岁还有25年，完全够你成为一个资深会计甚至财务主管。企业招会计的时候，反而更愿意要稳重、有生活阅历的人。\n\n第二个顾虑：零基础学不会怎么办？\n\n会计入门门槛没有你以为的那么高。核心需要的能力就三个：细心（别把数字抄错）、能坐得住（月底会忙一点）、愿意学规则（税法会更新要持续学习）。跟数学好不好关系真的不大，现在的财务软件已经很智能了，你输入数字它自动算。\n\n第三个顾虑：学了找不到工作怎么办？\n\n会计是每个企业都要的岗位，不是互联网那种可能裁员的岗位。小公司要会计、工厂要会计、门店要会计、代账公司更要会计。只要你能独立做账报税，就一定有地方需要你。中国几千万家企业，会计岗位的缺口一直很大。\n\n在${city}校区，看过太多${aud}迈出第一步之后的变化。最难的不是学，是开始。一旦开始了，后面的路比你想象的顺。`;
+      },
+            titles: {
+        f1: '30+转行做会计，晚不晚？实话告诉你',
+        f2: '30+零基础，3个月入行会计真的可以',
+        f3: '别因为年龄大就放弃，浪费的是自己',
+        f4: '距年底还有半年,现在开始完全来得及',
+        f5: '32岁行政转会计，她说最难的是下决心这一步',
+        f6: '30+转行会计，值不值得？这笔账算好了',
+        f7: '你转行最大的心理障碍是什么？',
+      }
+    },
+    {  // 转行后真实薪资
+      topic: "转行后真实薪资",
+      body: function(city, aud) {
+        return `转行做会计到底能赚多少钱？这是${aud}问得最多的问题，今天说点真实的\n\n先说结论：会计的起薪不算高，但涨幅稳定，越老越值钱\n\n入门阶段（0-1年）：会计助理或出纳，${city}这边一般3500-5000。这个阶段别挑薪资，重点是学东西。有人带、能接触全盘账的工作，比薪资高1000但只让你贴发票的工作值多了\n\n成长阶段（1-3年）：能独立做全盘账了，薪资能到5000-8000。这时候你已经不怕找工作了，因为能做全盘账的会计在哪都缺\n\n进阶阶段（3-5年）：有中级证加全盘经验，可以往主管方向走，薪资8000-12000。到这个阶段，你的职业选择就多了\n\n决定薪资的关键不是证书，是你会做什么。同样是会计，只会录入凭证的4000，能独立做全盘账报税的6000，能做税务筹划的10000+\n\n给${aud}的真心建议：转行前两年别焦虑薪资，把实操能力练出来。我见过太多转行的人，第一年4000觉得低跳来跳去还是4000。而那些踏踏实实练了一年全盘账的，第二年直接涨到6000+\n\n在${city}，想了解会计行业真实薪资水平的，我整理了一份本地会计岗位薪资参考表，需要的宝子看看自己处在什么阶段`;
+      },
+      titles: {
+        f1: '转行会计真实薪资，过来人的数据分享',
+        f2: '会计薪资3个阶段，差距真的大到离谱',
+        f3: '会计起薪确实不高，但后劲真的很猛',
+        f4: '第一年别太计较薪资，先把全盘账拿下',
+        f5: '她转行3年从4000涨到8000，怎么做到的',
+        f6: '为什么有人8K有人15K？差在这3件事',
+        f7: '在你们这，会计一个月多少钱？',
+      }
+    }
+  ],
+  lingjichu: [
+    {  // 会计到底学什么
+      topic: "会计到底学什么",
+      body: function(city, aud) {
+        return `很多人问：老师，我零基础，会计到底学什么？每次听到这个问题，我都想说——你问对人了。\n\n会计一点都不神秘。用大白话说，它就是记录一个公司花了多少钱、赚了多少钱、欠了多少钱、别人欠它多少钱。把这四件事算清楚，就是会计。\n\n零基础学会计的正确路线👇\n\n第一步：理解六个基础概念。资产（公司有什么）、负债（公司欠什么）、所有者权益（老板投了多少）、收入（赚了多少）、费用（花了多少）、利润（净赚多少）。这六个词搞懂了，会计的框架就立起来了。后面的所有东西都是围绕这六个词展开的。\n\n第二步：学票据。发票长什么样、支票怎么看、银行回单是什么意思、报销单怎么填。票据是会计的"原材料"，原材料都认不全，后面没法做。这一关最快，一两天就能过。\n\n第三步：学做凭证。把票据变成会计分录，借什么贷什么。这是会计的核心技能，也是最有"技术含量"的部分。刚开始会觉得绕，但做过几十笔之后就形成肌肉记忆了。\n\n第四步：学报税。增值税、企业所得税、个人所得税，每个税什么时候报、怎么算、去哪里报。报税是做账的终点，也是企业最关心的事。\n\n第五步：学报表。利润表看赚钱能力，资产负债表看家底厚不厚。能看懂报表，你就不是一个单纯的记账员了，而是能帮企业做决策的人。\n\n在${city}校区，零基础的学员第一周就能看懂发票，第二周开始做凭证。你比你想象的要强得多。`;
+      },
+            titles: {
+        f1: '零基础学会计，先别急着考证！',
+        f2: '零基础入门，先搞懂这5件事就够了',
+        f3: '零基础学会计，第一步走对太关键了',
+        f4: '暑假想学会计？先花一周做这件事',
+        f5: '零基础学了一个月，她敢投简历了',
+        f6: '学会计最大的成本不是学费，是拖延',
+        f7: '学会计你第一个害怕的是什么？',
+      }
+    },
+    {  // 零基础入门指南
+      topic: "零基础入门指南",
+      body: function(city, aud) {
+        return `给${aud}的入门指南👇\n\n很多人觉得学会计一定要数学好，这是最大的误解。会计需要的数学，小学水平就够了——加减乘除，偶尔算个百分比。真正的难点不是算数，是理解规则和流程。\n\n还有人说学会计要记忆力好，要背很多东西。其实入门阶段完全不需要死记硬背，重要的是理解逻辑。比如"有借必有贷、借贷必相等"这条规则，听起来很抽象，但你把它想象成天平：左边放了多少东西，右边就必须放多少，永远平衡。这样理解就永远不会忘。\n\n零基础学会计可以先从这几件小事开始👇\n\n第一，找几张真实的发票看一看，普通发票和专用发票有什么区别、上面每一项信息是什么意思。\n\n第二，找一套完整的做账流程教程，从头到尾看一遍，不用记细节，先建立"会计到底在做什么"的整体感觉。\n\n第三，找一个做会计的朋友或者老师聊一聊，问问他们一天的工作都在干什么、最有成就感的事是什么。真实的从业者反馈，比网上搜到的信息有用得多。\n\n在${city}想了解会计入门的，来校区感受一下真实的课堂。有人带着走一遍，比自己在家瞎琢磨高效太多了。`;
+      },
+            titles: {
+        f1: '会计入门大白话，3分钟看完心里有底',
+        f2: '入门3件事，顺序一错白忙活！',
+        f3: '数学不好能学会计吗？说实话：能！',
+        f4: '入职前两周！先把基础概念打牢再学实操',
+        f5: '学员说：入门第一周就懂了，没那么玄乎',
+        f6: '入门最容易踩的3个坑，提前告诉你',
+        f7: '学会计哪个概念最让你蒙？',
+      }
+    },
+    {  // 破除零基础恐惧
+      topic: "破除零基础恐惧",
+      body: function(city, aud) {
+        return `你是不是也在想：我零基础，学会计到底难不难？\n\n说实话，入门一点都不难。难的是什么？难的是没人告诉你第一步该做什么，然后你就一直停在"想"的阶段。\n\n零基础学会计最大的误区就是：一上来就买一堆教材想自学。初级会计实务、经济法基础、财务管理……看着厚厚的书，斗志三天就没了。为什么？因为会计是实操型技能，不是理论型学科。\n\n就像学开车，你看一万遍驾驶手册，不上车握方向盘，永远学不会。学会计也是一样，不做一遍完整的账，永远觉得它很复杂很神秘。但只要你坐在电脑前，打开财务软件，从第一张发票开始录入，你会发现——哦，原来就这样啊。\n\n在${city}，我带过很多${aud}。他们来的时候连发票都没见过，有的连Excel都用不利索。但经过系统的实操训练，快的三个月，慢的半年，就能独立处理公司的全盘账了。\n\n第一步走出来，后面的路就顺了。不是路难走，是你还没出发。`;
+      },
+            titles: {
+        f1: '学会计到底难不难？说句大实话',
+        f2: '学会计哪有那么难，就3步而已',
+        f3: '别被网上劝退帖吓到了，真的没那么难',
+        f4: '3个月！从零基础到敢去面试了',
+        f5: '学了3个月，她终于敢投简历了',
+        f6: '学会计最难的其实是：开始',
+        f7: '学会计，你觉得最难啃的是哪块？',
+      }
+    },
+    {  // 自学还是报班
+      topic: "自学还是报班",
+      body: function(city, aud) {
+        return `零基础学会计，到底自学还是报班？这个问题几乎每个${aud}都纠结过。今天帮你分析清楚\n\n先说自学。自学的优势是省钱、时间自由。但问题是：没有方向、没有反馈、坚持不下来\n\n会计是一门实操型技能，不是纯看书就能学会的。你看了三天借贷关系，觉得自己懂了，一到做题就懵。为什么？因为没有人告诉你哪里理解错了，你在错误的方向上越走越远\n\n自学最致命的问题是：没有实操环境。你看再多做账教程，不打开财务软件亲自录一笔凭证，永远学不会。就像看别人游泳，自己不下水，看十年也学不会\n\n再说报班。报班的优势是有方向、有反馈、有实操环境。老师知道你哪里容易出错，能当场纠正。同学一起学有氛围，不容易放弃。最重要的是：校区有财务软件、有真实的票据让你练\n\n但报班也不是随便报。${aud}选班的时候重点看三样：第一，有没有实操课不是只讲理论；第二，有没有财务软件让你上手练；第三，老师有没有真实做账经验\n\n在${city}，想体验一下会计课到底怎么上的，来校区试听一节。听完你就知道，自学和有人带的差距有多大了`;
+      },
+      titles: {
+        f1: '自学还是报班？帮你算笔实在账',
+        f2: '零基础选机构，用这3个标准不踩坑',
+        f3: '说实话，自学最大的坑是半途而废',
+        f4: '暑假想自学？先看完这篇再决定',
+        f5: '自学3个月放弃了，报班1个月上手了',
+        f6: '自学跟报班差在哪？就这一件事',
+        f7: '你学会计是自学还是报了班？',
+      }
+    }
+  ],
+  ketang: [
+    {  // 课堂实操记录
+      topic: "课堂实操记录",
+      body: function(city, aud) {
+        return `今天${city}校区实操课上，学员们在练做账全流程。从整理票据到录入凭证再到出报表，每个人都特别认真，教室里只有键盘声和翻凭证的声音。\n\n有个学员让我印象特别深——她刚来的时候连发票都分不清，今天能独立做完一套完整的凭证了，资产负债表平的那一刻，她激动得差点叫出来。我在旁边看着，真的挺感慨的。\n\n实操课最重要的是什么？不是老师在上面讲得多好，是学员自己动手练了多少遍。做账这种事情，听一百遍不如自己动手做一遍。\n\n课堂上还有个好处：你错了马上有人告诉你怎么改。有个学员在做凭证的时候借贷方向搞反了，老师走过来看了一眼就说"这里反了"，然后给她讲了一遍为什么。这种即时反馈，自己在家学完全没有。\n\n今天还有一个学员问了个特别好的问题：为什么办公室的水电费走管理费用，而仓库的水电费走制造费用？这个问题问到点子上了，我停下来给全班讲了一遍区别，大家都觉得收货很大。\n\n课堂上的真实画面，比任何广告都有说服力。在${city}想感受一下实操课的氛围，随时来校区看看。`;
+      },
+            titles: {
+        f1: '实操课真实记录｜比一万句广告都有用',
+        f2: '实操课这3个瞬间，看完直接想报名',
+        f3: '说实话，实操课跟你想的完全不一样',
+        f4: '今日课堂实拍：零基础学员在练这些',
+        f5: '学员原话：课堂10分钟，比我自学一个月强',
+        f6: '实操课最关键的一步，错过等于白学',
+        f7: '你上过会计实操课吗？',
+      }
+    },
+    {  // 学员变化见证
+      topic: "学员变化见证",
+      body: function(city, aud) {
+        return `每次看到学员从一脸懵到慢慢上手的样子，都觉得这份工作特别有意义。\n\n今天${city}校区零基础班上机操作，内容是凭证录入。刚开始的时候，有几个学员连借贷方向都搞不清，急得额头冒汗。我让他们先别急，在草稿纸上画一画：这个科目是什么类？增加了还是减少了？根据规则应该记借方还是贷方？\n\n两个小时后，所有人都能独立录入一套完整的凭证了。那种"我终于搞懂了"的表情，是教室里最好看的画面。\n\n我悄悄拍了几张大家练习的场景：有的在草稿纸上画T字账，有的在认真核对发票金额和日期，有的在小声问同桌"这笔对不对"。这种一起学习、互相帮忙的氛围，线上课永远给不了。\n\n来校区看看就知道，零基础真的不是问题。有老师带着，有同学一起，遇到不懂的随时问，比你一个人对着屏幕学轻松多了。很多学员说，来校区上了一节课之后才发现，自己之前的担心全是多余的。在${city}想了解实操课的，来校区看看真实的课堂吧。`;
+      },
+            titles: {
+        f1: '零基础一个月，变化大到我自己都惊了',
+        f2: '零基础3周后的变化，太真实了',
+        f3: '看到学员进步，真的比什么都开心',
+        f4: '第三周！学员的状态就完全不一样了',
+        f5: '学了一个月，她终于敢独立做账了',
+        f6: '线下实操跟网课的区别，一张图说清',
+        f7: '零基础学实操，你觉得哪块最难？',
+      }
+    },
+    {  // 课堂问答分享
+      topic: "课堂问答分享",
+      body: function(city, aud) {
+        return `今天课堂上一个学员说的话让我印象很深。\n\n她说：老师，我之前在网上看了很多做账的免费教程，看了得有个把月，但越看越糊涂。今天自己动手做了一遍，从票据到凭证到报表完整走下来，突然就通了。原来做账就这回事啊！\n\n她说得太对了。这就是线下课最核心的价值——不是老师讲得有多好，是你自己动手做的过程中，所有的卡点都在当场被解决掉了。\n\n线上看教程，你遇到不懂的只能暂停、回放、或者去搜，搜完回来又忘了刚才讲到哪了。但在课堂上，你做到哪一步卡住了，一抬头老师就在旁边："这里是不是不太明白？来，我跟你讲一下为什么这样做。"\n\n今天练习的内容是增值税申报实操。从发票认证、进项销项计算、到填申报表、提交，每一步都有老师检查，错了当场改。两个小时下来，每个人都完整地报了一次税。\n\n${city}校区的实操课，欢迎来感受一下。比你想象的有意思多了。`;
+      },
+            titles: {
+        f1: '课堂上一个问题，全班都安静了',
+        f2: '课堂5分钟的答疑，比自己看1小时管用',
+        f3: '学员问的问题，有时候比老师讲的还值钱',
+        f4: '今天课堂上，一位学员说的话让我很触动',
+        f5: '课堂上一个问题，让她直接开窍了',
+        f6: '课堂上敢问的人，进步速度完全不一样',
+        f7: '学会计时，你脑子里最大的问号是什么？',
+      }
+    },
+    {  // 学员做账成果展示
+      topic: "学员做账成果展示",
+      body: function(city, aud) {
+        return `今天给大家看看${city}校区学员的真实做账成果，不是摆拍，是课堂上学员自己做的\n\n第一份是一位宝妈学员做的全月凭证。从审核原始票据到录入46笔凭证，再到登记账簿和编制报表，全程独立完成。她刚来的时候连发票都看不懂，学了两个月能做到这个水平，真的很厉害\n\n第二份是一位转行学员做的增值税申报表。从发票认证、进项销项汇总到填写申报表，每一步都清清楚楚。最让我欣慰的是，她在备注栏写了每一步的思路，这说明她不只是学会了操作，还理解了背后的逻辑\n\n第三份是一位应届生做的资产负债表。期初余额录入、本期发生额、期末余额，全部正确，报表一次就平了。很多有经验的会计都做不到一次平，她第一次做就平了，说明基本功非常扎实\n\n展示这些不是为了炫耀，是想告诉还在犹豫的${aud}：别人能做到的，你也能做到。他们刚来的时候和你一样，连借贷方向都搞不清。但只要跟着练，两三个月就能独立做账\n\n在${city}校区，每天都有学员从零到能独立做账的蜕变。来感受一下真实的课堂氛围，你会发现会计没有你想象的那么难`;
+      },
+      titles: {
+        f1: '学员真实做账成果！不是摆拍，是上课做的',
+        f2: '3位学员的做账作业，看完你就懂了',
+        f3: '看到学员自己做出来的账，太欣慰了',
+        f4: '学完2个月！学员已经能做到这水平了',
+        f5: '两个月！她从零到独立做完一套账',
+        f6: '零基础2个月 vs 有经验3年，差距就在这',
+        f7: '你觉得学多久能自己独立做账？',
+      }
+    }
+  ],
+  zhaopin: [
+    {  // 岗位类型介绍
+      topic: "岗位类型介绍",
+      body: function(city, aud) {
+        return `${city}的会计岗位最近挺多的，帮大家整理了一下，尤其适合${aud}的几个方向👇\n\n会计助理岗：最适合应届生和零基础转行。日常工作就是整理票据、录入凭证、协助主办会计报税、跑跑税务局和银行。薪资一般在3500-5000起步，要求会用Excel、有基本财务概念、细心。这个岗位最大的好处是有人带你，你边做边学，半年到一年后就有跳槽的资本了。\n\n出纳岗：管钱管票的岗位，适合心细的人。每天跟银行和现金打交道，收支两条线必须一分不差。要求懂票据审核、会资金日报表。薪资4000-5500起步。做一年出纳再转会计，路线非常顺，因为你对公司的资金流已经很熟悉了。\n\n费用会计岗：专门负责审核报销和管理费用的岗位。你需要熟悉公司的报销制度，审核每一张发票是否合规、金额是否在预算内。这个岗位做熟了，再去学全盘账，过渡很自然。薪资4500-6000起步。\n\n${aud}找工作最重要的一点：不要只盯着"会计"两个字搜。会计助理、出纳、财务助理、税务助理、审计助理，这些都是入行的好跳板。先进去，积累经验，再往全盘会计方向走。\n\n在${city}，最近本地企业招会计的岗位挺多的，我整理了一份超全的岗位类型清单，想入行的宝子可以看看哪个适合你～`;
+      },
+            titles: {
+        f1: '零基础能做什么会计岗？一图看懂',
+        f2: '3类新手友好会计岗，照着投就对了',
+        f3: '会计招聘要求，真没你以为的那么高',
+        f4: '7月招聘旺季！想入行的赶紧投简历',
+        f5: '投了10家终于上岸，她的求职经历',
+        f6: '会计新人工资能拿多少？晋升路线一次说完',
+        f7: '你最想做会计哪个方向？',
+      }
+    },
+    {  // 找工作思路
+      topic: "找工作思路",
+      body: function(city, aud) {
+        return `最近好多人在问${city}有没有适合${aud}的会计岗位，今天给大家梳理一下找工作的完整思路👇\n\n第一步：先搞清楚自己适合什么岗位。这个非常重要，投错方向很浪费时间。零基础→首选会计助理或出纳。有初级证但没有实操经验的→会计助理或费用会计。有实操经验能做全盘账的→直接投全盘会计或税务会计。\n\n第二步：准备好简历，重点写清楚你会什么。会计简历不需要花里胡哨，面试官最关心的是：你用什么财务软件（用友、金蝶、SAP都行）、你能处理哪些票据（发票、支票、银行回单）、你会报哪些税（增值税、企业所得税必写）。每一项都写具体的，不要模糊。\n\n第三步：去哪投。各大招聘App上会计类岗位不少，搜"会计"在本地筛选就能看到一堆。大公司去官网投校招或社招也可以。另外别忘了本地的招聘群、社区招聘栏，很多小公司的会计岗不会挂在网上，要靠自己去发现。\n\n给${aud}的真心话：入行第一年别太计较薪资，先把自己的实操能力练出来。做过一年全盘账之后，你的身价翻倍。在${city}，最近很多本地企业在招会计，我整理了一份超全的岗位清单，从零基础到有经验的都有，需要的宝子看看哪个适合你～`;
+      },
+            titles: {
+        f1: '应届生找会计工作，照着这3步走就行',
+        f2: '应届生求职会计，有3步千万不能搞错',
+        f3: '应届生别乱投简历！方向比数量重要100倍',
+        f4: '毕业前3个月！简历这样写面试多到挑',
+        f5: '应届生1个月准备，拿下会计offer的攻略',
+        f6: '会计新人该提前多久准备？一个时间表',
+        f7: '应届生找会计工作，最怕遇到什么？',
+      }
+    },
+    {  // 入门岗位指南
+      topic: "入门岗位指南",
+      body: function(city, aud) {
+        return `给${aud}的岗位指南，说清楚三个最常见入门岗位的区别👇\n\n会计助理——入门首选没有之一。日常工作就是帮主办会计整理票据、录入凭证、跑税务局和银行、打印装订账簿。完全不需要经验，有老会计带着你做。做半年到一年，你就能独立处理大部分基础工作了。适合人群：应届生、宝妈重返职场、零基础转行。\n\n出纳——也是入门岗，但跟会计助理的方向有点不同。出纳管的是钱：现金、银行存款、支票、印章。每天做资金日报表，下班前现金和账必须对得上一分不差。做一年出纳再转会计，你对公司的资金流已经非常熟悉了，做账的时候更容易理解业务的来龙去脉。但出纳对细心的要求比会计助理高，粗心的人慎选。\n\n费用会计——专门审核报销的岗位。全公司的报销单都要经过你的手：发票真不真、金额对不对、有没有超标、符不符合报销制度。这个岗位特别锻炼你审核票据的眼力，做过费用会计的人，什么样的发票都见过了。\n\n在${city}，这三类入门岗位招得都挺多的。我整理了一份详细的岗位对比清单，想入行的宝子看看哪个更适合自己～`;
+      },
+            titles: {
+        f1: '会计助理vs出纳vs费用会计，新人怎么选',
+        f2: '3个入门会计岗对比，优缺点一次说清',
+        f3: '别只搜"会计"！这些岗也是会计方向',
+        f4: '会计新人入职第一周，照着做不出错',
+        f5: '有证没经验，她选了这个岗成功上岸',
+        f6: '同是会计，工资差好几K，原来差在这',
+        f7: '会计这么多岗位，你更想做哪个？',
+      }
+    },
+    {  // 入职第一周
+      topic: "入职第一周",
+      body: function(city, aud) {
+        return `刚入职会计岗，第一周应该做什么？很多${aud}入职后一脸懵，不知道从哪下手。今天给你一个第一周的行动清单\n\n第一天：熟悉公司环境和人。认识你的直属领导、同事、了解公司的业务范围。会计不只是算账，你要理解公司的业务才能做好账。问清楚公司用什么财务软件、税务是一般纳税人还是小规模\n\n第二天：翻看前三个月的凭证和账簿。看别人是怎么做的，是最快的学习方式。重点关注：凭证怎么编号、摘要怎么写、哪些费用走什么科目。把不懂的记下来，集中问\n\n第三天：熟悉财务软件的操作。让别人给你开个账号，自己试着录入几笔凭证。刚开始慢没关系，关键是熟悉界面和操作流程\n\n第四天：了解报税流程。看之前的申报表是怎么填的，哪些税每月报、哪些季度报。把申报日期记在日历上，这是会计最不能忘的事\n\n第五天：整理你的工作清单。把每月、每周、每天要做的事列出来，形成自己的工作节奏\n\n给${aud}的忠告：第一周千万别装懂，不懂就问。新人有不懂的太正常了，老会计不会笑话你。但如果你不懂装懂，做错了账，那才是真的麻烦\n\n在${city}，最近很多本地企业在招会计，我整理了一份入职指南和岗位清单，想入行的宝子看看`;
+      },
+      titles: {
+        f1: '会计入职第一周，照着这个清单过',
+        f2: '入职第一周！这5件事的顺序很关键',
+        f3: '入职第一周最傻的行为：不懂装懂',
+        f4: '刚入职会计岗，先做这5件事立住脚跟',
+        f5: '入职第一周这么做，领导直接说靠谱',
+        f6: '入职第一周最常犯的3个错，别踩',
+        f7: '入职第一周，你是什么感受？',
+      }
+    }
+  ],
+  mianshi: [
+    {  // 面试回答技巧
+      topic: "面试回答技巧",
+      body: function(city, aud) {
+        return `面了几家会计岗都没下文？今天说点面试的大实话，很多人都踩过这些坑👇\n\n大部分${aud}面试翻车，真不是能力问题，是准备方向完全错了。你准备的那些"自我介绍""职业规划"，面试官其实没那么关心。他们最关心一个问题：你能不能干活？\n\n最常见的一个面试场景：面试官问"你会做账吗"。很多人的回答是"不会，但我愿意学，我学东西很快"。这个回答听起来没错，但面试官脑子里想的是——我要招一个马上能干活的，不是来培训的。\n\n换个说法，效果完全不一样👇\n\n"我在学习阶段已经完整跑过全盘账流程，从审核原始凭证到出资产负债表和利润表，整个逻辑是通的。如果有老会计带一到两周，我有信心一个月内独立处理日常账务。我做过完整的实操练习，我能说出每一步要注意什么。"\n\n这段话有三层意思：第一，我没有粉饰说我会，但我不是零基础（展示框架意识）。第二，我有自知之明，知道需要带教（展示务实态度）。第三，我给了一个具体的上手时间（让对方安心）。\n\n在${city}，我帮很多学员改过面试回答。有时候真不是你不会，是你不会说。`;
+      },
+            titles: {
+        f1: '会计面试被问倒？这个回答思路收好',
+        f2: '面试3个加分回答，背下来直接用',
+        f3: '面试被拒，真不一定是能力不行',
+        f4: '面试前3天！把这4件事做完再去面',
+        f5: '就改了一句话的回答，直接拿到offer',
+        f6: '面试千万别说"我不会但我愿意学"',
+        f7: '面试时，你最怕被问到哪个问题？',
+      }
+    },
+    {  // 面试常见问题
+      topic: "面试常见问题",
+      body: function(city, aud) {
+        return `会计面试最常被问的三类问题，提前准备好，面试的时候完全不一样👇\n\n第一类：专业问题。面试官会问"做账流程是什么""三大报表之间有什么关系""一般纳税人增值税怎么算"。这类问题考察的是你的基本功扎不扎实，不需要多精彩的回答，说清楚就行。提前花一个小时把这些基础知识点过一遍，脑子里有个框架。\n\n第二类：情景题。比如"月底发现应收账款和客户对不上怎么办""发票开错了跨月了怎么处理""税务局来查账你怎么办"。这类问题考的不是标准答案，是你处理问题的思路。回答的公式是：先排查→再确认→再处理→最后汇报。不要说"我不知道"，要说"我会先……然后……最后……"。\n\n第三类：个人问题。最常见的有三个："为什么想做会计"（考察动机和稳定性），"你的缺点是什么"（考察自我认知，别说"没有缺点"），"期望薪资多少"（考察你对市场行情的了解）。这类问题的关键是真诚+合理，不用编完美答案。\n\n在${city}，面试没底气的宝子，我整理了一份会计面试高频问题+回答思路，提前看一遍心里就有谱了～`;
+      },
+            titles: {
+        f1: '会计面试准备清单，一项项勾完就稳',
+        f2: '面试出门前，这5样东西千万别忘',
+        f3: '零经验面试，最怕的根本不是做账',
+        f4: '下周面试？提前3天这样准备稳稳的',
+        f5: '自我介绍练了3遍，面试真的不卡壳了',
+        f6: '大公司和小公司面试，问的完全不一样',
+        f7: '你面试前一般准备多久？',
+      }
+    },
+    {  // 自我介绍模板
+      topic: "自我介绍模板",
+      body: function(city, aud) {
+        return `会计面试自我介绍30秒万能模板，背下来直接套👇\n\n"面试官好，我叫XX。我有XX证书，系统学习过做账报税全流程，从票据审核到凭证录入到报表编制都会。能熟练使用Excel和XX财务软件。上一份工作/学习阶段，我做过XX（说一个具体案例，比如独立完成了某个月的账务处理）。我的优点是细心、上手快、对数字敏感。希望能有机会在这个岗位上发挥我的能力。"\n\n这个模板覆盖了五个关键信息：身份（你叫什么）、硬技能（证书+实操）、工具（软件）、案例（证明你做过）、性格（细心+执行力）。面试官最想知道的就这五件事，30秒说完，不多不少。\n\n另外提醒${aud}一个小细节：面试穿得体的便装就行，不用刻意西装革履。会计岗位看的是你靠不靠谱，不是穿得多正式。整洁大方就够了，把心思花在回答内容上。\n\n提前写好这段自我介绍，对着镜子完整说三遍。面试的时候开场就不慌了，后面的问题越答越顺。`;
+      },
+            titles: {
+        f1: '会计面试自我介绍模板，30秒说完',
+        f2: '自我介绍缺这3样，面试官直接减分',
+        f3: '面试时别说"虽然我不会"，这么说才对',
+        f4: '面试前！把这3句话练到脱口而出',
+        f5: '靠这个自我介绍，她拿了3个offer',
+        f6: '会计自我介绍黄金模板，背熟直接用',
+        f7: '你的自我介绍练了多少遍？',
+      }
+    },
+    {  // 零经验面试策略
+      topic: "零经验面试策略",
+      body: function(city, aud) {
+        return `零经验面试会计岗，怎么让面试官愿意要你？今天分享几个实用的策略\n\n${aud}面试最大的劣势是：没有实操经验。但你可以通过回答方式，把这个劣势变成"有潜力"的印象\n\n策略一：用"学习成果"代替"工作经验"\n\n面试官问"你做过账吗"，别直接说"没有"。换一种说法："我在学习阶段完整做过一套模拟账，从原始凭证审核到报表编制全流程都走过。虽然不是真实工作环境，但流程和逻辑是一样的。如果有老会计带一两周，我上手会很快"\n\n策略二：主动展示你的学习计划\n\n面试结束前，面试官通常会问"你还有什么问题吗"。这时候别说"没有"。问一个有水平的问题："我想了解一下，咱们公司用的什么财务软件？如果有机会入职，我想提前熟悉一下"，这句话直接让面试官觉得你靠谱\n\n策略三：准备好"为什么转行"的回答\n\n面试官一定会问你为什么转行做会计。千万别回答"因为会计稳定"，太敷衍了。要讲一个真实的故事："我之前做XX，发现自己对数字和流程更感兴趣，所以系统学习了会计。我觉得我之前的工作经验能帮到我，比如XX"\n\n在${city}，面试没底气的宝子，我整理了一份零经验面试话术清单，提前看看心里有底`;
+      },
+      titles: {
+        f1: '零经验面试会计，按这个策略准备',
+        f2: '零经验面试，3个策略让面试官改观',
+        f3: '零经验面试别怕，有这一招就够了',
+        f4: '零经验面试前3天，做好这些就够了',
+        f5: '零经验！就因为回答对一句话，拿到offer',
+        f6: '零经验跟有经验面试的差距，其实是这个',
+        f7: '没有经验去面试，你最怕被问什么？',
+      }
+    }
+  ],
+  kaozheng: [
+    {  // 初级考后规划
+      topic: "初级考后规划",
+      body: function(city, aud) {
+        return `初级刚考完，好多人来问接下来干什么。今天统一说清楚👇\n\n先说一个很多人不愿意面对的现实：考证只是第一步，远不是最后一步。很多人考完证兴冲冲投简历，结果面试第一轮就被问住了。"你会做账吗？""你报过税吗？"——初级证书上不教这些。\n\n企业招会计的逻辑非常简单：我要能干活的，不是有张纸的。证书证明你学过理论，但上岗靠的是动手能力。\n\n初级考完后建议马上做这四件事👇\n\n第一，趁热打铁补实操。你刚学完理论，借贷方向还记着呢，这时候学实操效率最高。做账全流程、报税全流程、财务软件操作，这三样是上岗标配。用友或金蝶至少熟练一个。\n\n第二，更新简历。不是改一句"已取得初级会计证书"就完了，还要写上你会什么实操技能。写具体的：能独立完成发票审核、凭证录入、增值税申报、利润表编制。每一条都是面试时的得分点。\n\n第三，开始投简历，边投边准备。不要等"完全准备好了"再投，会计这个岗位，面试本身就是最好的学习。面了三家你就知道企业到底要什么了。\n\n第四，保持学习惯性。初级考完的学习状态是最好的，别断。如果目标是往上走，中级是下一个必须拿的证。但中级建议边工作边考，不要脱产备考。\n\n在${city}，考完初级想补实操的，来了解一下怎么把证书变成上岗能力。`;
+      },
+            titles: {
+        f1: '初级考完别闲着！马上做这4件事',
+        f2: '初级考后4件事，别让证书吃灰',
+        f3: '考完初级≠能找工！还差最关键一步',
+        f4: '考完30天内！是你补实操的黄金窗口',
+        f5: '考完初级又补了3个月实操，面上了',
+        f6: '初级证和实操能力，到底哪个更重要？',
+        f7: '初级考完了，下一步你打算干什么？',
+      }
+    },
+    {  // 中级备考攻略
+      topic: "中级备考攻略",
+      body: function(city, aud) {
+        return `离中级考试越来越近了，很多人问现在还来得及吗？来得及。但方法一定要对👇\n\n中级三科的时间分配黄金比例：实务40%，财管35%，经济法25%。不要平均用力，实务和财管是最拉分的两科。\n\n实务是内容最多的一科，也是最贴近实际工作的。有几个章节必须拿下：长期股权投资、合并财务报表、所得税、收入。这几章每年必出大题，绕不过去。实务的学习方法是：先听一遍课理解框架，然后疯狂刷题。做题比听课重要，因为只有做题你才知道考点怎么变形。\n\n财务管理公式最多，看起来吓人，但财管的公式之间是有逻辑关系的，不建议死记硬背。理解了画个图推导一遍，比背十遍都有用。重点攻资金时间价值、投资决策、财务分析这几个板块。\n\n经济法偏记忆型，现在不用花太多时间背，先听课理解为主。考前一个月集中背诵效果最好，因为经济法考的就是记忆精准度。\n\n给${aud}的备考节奏建议：每天保证至少2小时有效学习时间，周末4小时。现在的阶段是听课+分章做题，再过一个月开始刷真题套卷。\n\n需要详细的备考计划和学习资料，厚台dd，我整理好了发你～`;
+      },
+            titles: {
+        f1: '中级会计备考大白话，三科这样分配最好',
+        f2: '中级备考这3个坑，提前知道省一半力',
+        f3: '中级最容易崩的：不是基础，是方法错了',
+        f4: '还剩60天！中级这样冲刺还来得及',
+        f5: '过来人经验：中级最后2个月这样冲刺最有效',
+        f6: '中级三科时间怎么分？差一点结果差很多',
+        f7: '中级你学到哪了？',
+      }
+    },
+    {  // 有证没经验怎么办
+      topic: "有证没经验怎么办",
+      body: function(city, aud) {
+        return `有个问题几乎每个刚考证的人都会问：为什么我有证还是找不到工作？\n\n答案不是证书没用，是只靠证书不够。企业招会计看三样东西，按重要程度排序：实操经验（能不能干活）、态度（靠不靠谱）、证书（有没有学过理论）。你只有第三样，前两样为零。\n\n面试官问你"你会做账吗"，你说"我考过初级"。这种回答在面试官耳朵里翻译过来就是：我不会做账。\n\n你应该说："我系统学习过完整的做账流程，从拿到原始票据到出报表都会。凭证录入、账簿登记、报税申报的每一步我都练过。这是我的实操练习成果。"——同样是你，同样的水平，两种说法天差地别。\n\n给${aud}最重要的建议：考证和实操不要分开搞，要同时进行。一边学理论一边练动手，这样你面试的时候能说的就不只是"我有证"，而是"我能做"。很多学员按这个思路来，面试底气完全不一样了。\n\n在${city}，考证和实操可以同步学。我整理了一份考证实操同步规划表，需要的宝子厚苔滴一下～`;
+      },
+            titles: {
+        f1: '有证没经验？先把实操补上再投简历',
+        f2: '有证没经验，面试前先做这3步',
+        f3: '有证不会做账，真不是你的问题',
+        f4: '有证没经验先别投！把实操补了再说',
+        f5: '有证没经验，补了3个月实操上岸了',
+        f6: '证书跟实操能力的差距，比你想象的大',
+        f7: '有证但不会做账，最让你焦虑的是什么？',
+      }
+    },
+    {  // 考证时间规划
+      topic: "考证时间规划",
+      body: function(city, aud) {
+        return `会计考证到底按什么顺序考？什么时候考？今天帮你规划清楚\n\n很多${aud}一上来就问"我要不要直接考CPA"。我的建议是：除非你是财会专业本科毕业，否则别一上来就冲CPA，通过率会打击你的信心\n\n正确的考证路线\n\n第一阶段：初级会计职称。这是会计行业的入门证，考试难度不高，零基础准备3-4个月可以过。建议大学期间或转行初期就拿下\n\n第二阶段：中级会计职称。中级需要工作经验才能报考，大专5年、本科4年、双学位2年、硕士1年。所以不用急，先把实操练好，等工作年限够了再考。备考建议提前6个月开始\n\n第三阶段：CPA或税务师。有了中级之后，可以根据职业方向选择。想去事务所的冲CPA，想在企业做税务方向的考税务师。这两个证书含金量高但难度大，建议边工作边考，不要脱产\n\n关于考证和实操的关系，最理想的时间线是：学实操，考初级，上岗，攒经验，考中级，考CPA。证书和经验同步积累，每一步都有职场价值\n\n在${city}，想了解考证时间规划的，我整理了一份从初级到CPA的完整路线图，需要的宝子厚苔滴一下`;
+      },
+      titles: {
+        f1: '会计考证全路线图，一眼看懂该先考哪个',
+        f2: '考证分3个阶段，顺序搞错浪费好几年',
+        f3: '别一上来就冲CPA！先想清楚这条路怎么走',
+        f4: '今年内！先把初级证拿下来再说',
+        f5: '3年拿下初级+中级，工资翻了一倍',
+        f6: '初级→中级→CPA，每一步难度跳多大？',
+        f7: '你现在在备考哪个证？',
+      }
+    }
+  ],
+  boss: [
+    {  // 财税临界点
+      topic: "财税临界点",
+      body: function(city, aud) {
+        return `做企业的老板一定要知道这几个数字，过了一个坎税可能差很多👇\n\n第一条线：小规模纳税人年销售额500万。这个数字非常关键。年销售额超过500万，税务局会强制要求你转一般纳税人。小规模纳税人的增值税征收率一般是1%或3%，一般纳税人税率可能是13%、9%或6%。税率差了几倍，税额自然也差了几倍。所以在接近500万那条线的时候，要提前做好税务规划，不是到了再想办法。\n\n第二条线：小微企业年应纳税所得额300万。300万以下适用优惠税率，实际税负很低。一旦超过300万，税率直接跳到25%。这个差别有多大？举个例子：利润299万，按优惠税率大概交不到20万的税。利润301万，交的税可能超过75万。多赚了2万，多交50多万的税。\n\n第三条线：小规模纳税人月销售额10万。月销售额不超过10万，免征增值税。超过10万，全额征收。这个临界点也要注意。\n\n这些临界点，很多老板是踩了坑交了很多冤枉钱才知道的。提前了解，在合规的前提下合理规划，能省不少。\n\n在${city}，有财税方面的疑问，可以一起交流交流。`;
+      },
+                  titles: {
+        f1: '老板必看！这3个税务数字，过了线税差几万',
+        f2: '企业这3个税务数据，一过线税就翻倍',
+        f3: '不懂临界点的老板，年底一算多交十几万税',
+        f4: '年底前！老板先把这几笔账理清楚',
+        f5: '一个老板不懂临界点，多交了10万冤枉税',
+        f6: '小规模30万/一般纳税人500万，必须记住',
+        f7: '老板们，这几个数字你知道吗？',
+      }
+    },
+    {  // 报表解读
+      topic: "报表解读",
+      body: function(city, aud) {
+        return `很多老板看报表只看最后一行的利润数字，这个习惯很危险。利润是纸上的，现金流才是口袋里的。真正决定企业能不能活下去的，是这几条线👇\n\n第一条：现金流。利润很高但账上没钱，说明你的钱都在应收账款里——客户欠你的，但你还没收到。应收账款回不来，你连工资都发不出。所以看报表的时候，利润表和现金流量表要一起看，不能只看利润。\n\n第二条：资产负债率。就是你欠的钱占你总资产的比例。一般的经验是控制在60%以内比较安全。超过70%，银行就不太愿意再给你贷款了，因为风险太高。负债不可怕，适度的负债是在利用杠杆，但过高的负债就是在走钢丝。\n\n第三条：费用率。收入100万，各种费用加起来花了85万，看着有15万利润。但如果费用率一直在涨，说明你的管理成本在失控。特别是销售费用和管理费用，每个月要盯着看变化趋势，不是看绝对值。\n\n给${aud}的建议：每个月至少认真看一次完整的财务报表，不要等到年底算总账。财税问题越早发现越好处理，拖到年底很多事就来不及了。\n\n有具体的财税疑问，说出来一起分析分析。`;
+      },
+                  titles: {
+        f1: '老板看报表，最该盯紧的不是利润！是这3条',
+        f2: '公司健康不健康？每月盯这3个数就够了',
+        f3: '大部分老板看报表，只盯着一个数…',
+        f4: '每月10分钟！看这几个数字，比会计还懂',
+        f5: '一个老板学会看报表后，少踩了十几万的坑',
+        f6: '现金流、负债率、费用率，老板必须懂',
+        f7: '老板们，报表你自己看还是全交给会计？',
+      }
+    },
+    {  // 财税合规
+      topic: "财税合规",
+      body: function(city, aud) {
+        return `财税合规这件事，早做比晚做好一万倍。很多老板平时不重视，等税务局找上门才着急，那时候付出的代价就不是请个会计的工资了👇\n\n第一件事：发票管理一定要规范。进项发票必须真实、完整、及时认证。很多企业的痛点：供应商迟迟不给发票，你也没催，结果到了月底发现进项不够，增值税要多交不少。还有的企业买了发票但忘记在期限内认证，白白浪费了抵扣的机会。发票管理这件小事，直接影响你交多少税。\n\n第二件事：公私账户一定要分开。老板的个人消费不要走公司账，公司的钱不要随便转到个人卡上。这条是税务稽查的重中之重。很多小企业觉得混着用方便，但一旦被查，补税加罚款，而且很难解释清楚。\n\n第三件事：申报不能逾期。不管这个月有没有业务，零申报也要按时做。逾期申报除了有罚款和滞纳金，还会影响企业的纳税信用等级。信用等级低了，以后贷款、招投标、申请补贴都受影响。\n\n给${aud}的忠告：财税这件事，花小钱请人提前把合规做好，比事后花大钱补税划算得多。在${city}，企业财税方面有困惑的，随时来找我交流。`;
+      },
+                  titles: {
+        f1: '老板注意！财税合规这3件事不做，迟早出事',
+        f2: '公司财税出问题了？这3个信号一出现就危险',
+        f3: '别等税务局上门了才后悔，提前做好',
+        f4: '年底前！企业财税合规再过一遍',
+        f5: '老板说：财税合规花的钱，是我最值的一笔',
+        f6: '公私不分、发票混乱，多少企业栽在这上面',
+        f7: '老板们，财税合规这事你重视吗？',
+      }
+    },
+    {  // 个体户vs公司
+      topic: "个体户vs公司",
+      body: function(city, aud) {
+        return `创业第一步就面临选择：注册个体户还是注册公司？这个选择直接影响你的税和责任，今天帮你算清楚\n\n先说个体户。个体户最大的优势是简单：注册容易、税务简单、没有企业所得税。月销售额10万以下免增值税，个人所得税按经营所得交。适合小本生意、夫妻店、自由职业者\n\n但个体户有一个致命的劣势：无限连带责任。你的生意亏了钱，债权人可以追你个人财产。你的房子、车子、存款都得赔进去。另外个体户不能开分店、不能融资、转让也麻烦\n\n再说公司。公司最大的优势是有限责任：你投了多少钱，最多就赔多少钱，个人财产不受影响。公司还能开分公司、能融资、能转让。适合有扩张计划的创业者\n\n公司的代价是税务更复杂：要交企业所得税25%，小微企业有优惠，分红还要交20%个税。还要做账报税，维护成本比个体户高\n\n怎么选？看三个因素：第一，你的业务风险大不大，风险大选公司；第二，你未来要不要扩张，要扩张选公司；第三，你的利润水平，利润低选个体户税更少\n\n在${city}，创业注册有疑问的，可以一起交流交流，帮你看看怎么选最合适`;
+      },
+      titles: {
+        f1: '个体户vs公司，一张表告诉你哪个更省税',
+        f2: '注册公司前！这3个选择决定了你要交多少税',
+        f3: '个体户最大的坑：无限责任！很多人不知道',
+        f4: '创业第一步！先把注册类型搞明白再注册',
+        f5: '选错公司类型，一个老板多交了5万的税',
+        f6: '个体户跟公司，到底差多少税？算笔明细账',
+        f7: '你注册的是个体户还是公司？',
+      }
+    }
+  ]
+};
+
+const audienceLabels = {
+  xinren: '零基础小白',
+  youzheng: '有证没经验的会计新人',
+  baoma: '想重返职场的宝妈',
+  zhuanhang2: '30岁以上想转行的人',
+  zaizhi: '在职想提升的会计',
+  laoban: '中小企业的老板',
+};
+
+const conversionHooks = {
+  shicao: [
+    { label: '干货互动', text: '这几种做账方法你平时用哪个？说说看～' },
+    { label: '自然引导1', text: '需要完整版做账流程的话，厚苔滴一下' },
+    { label: '自然引导2', text: '想要分录速查表的，dd我哦' },
+    { label: '自然引导3', text: '有实操问题的，si我呀，帮你看看' },
+  ],
+  zhuanhang: [
+    { label: '共鸣互动', text: '你身边有想转行做会计的朋友吗？TA最大的顾虑是什么？' },
+    { label: '自然引导1', text: '想了解转行路线的，厚台dd' },
+    { label: '自然引导2', text: '不确定自己适不适合的，思我一下吧' },
+    { label: '自然引导3', text: '转行会计有疑问的，dd我哦一起聊·聊' },
+  ],
+  lingjichu: [
+    { label: '入门互动', text: '零基础学会计，你最担心什么？说说看' },
+    { label: '自然引导1', text: '想了解学习路线的，厚苔滴一下' },
+    { label: '自然引导2', text: '不确定能不能学会的，si我呀帮你分析' },
+    { label: '自然引导3', text: '在{city}想了解会计入门的，厚台dd' },
+  ],
+  ketang: [
+    { label: '体验引导', text: '想感受一下实操课的氛围吗？厚台dd帮你安排试听' },
+    { label: '自然引导1', text: '想看看课堂上都学什么的，思我一下吧' },
+    { label: '自然引导2', text: '在{city}想体验的，dd我哦' },
+  ],
+  zhaopin: [
+    { label: '岗位互动', text: '这几种岗位类型你更想看哪种？说说看' },
+    { label: '自然引导1', text: '需要最新岗位信息的，厚台dd' },
+    { label: '自然引导2', text: '不确定自己适合哪个岗位的，si我呀帮你看看' },
+    { label: '自然引导3', text: '在{city}找会计工作的，厚苔滴一下' },
+  ],
+  mianshi: [
+    { label: '面试互动', text: '面试被问过最刁钻的问题是什么？来分享一下' },
+    { label: '自然引导1', text: '需要面试题整理版的，dd我哦' },
+    { label: '自然引导2', text: '面试没底气的，思我一下吧帮你看看' },
+    { label: '自然引导3', text: '想要自我介绍模板的，厚台dd就发你' },
+  ],
+  kaozheng: [
+    { label: '考证互动', text: '考完初级的你们，现在在做什么？' },
+    { label: '自然引导1', text: '需要备考计划的，厚苔滴一下' },
+    { label: '自然引导2', text: '考完证想补实操的，si我呀帮你规划' },
+    { label: '自然引导3', text: '想知道考后学什么的，dd我哦' },
+  ],
+  boss: [
+    { label: '财税互动', text: '做企业的老板，你踩过财税的坑吗？' },
+    { label: '自然引导1', text: '有财税问题的，厚台dd一起交流' },
+    { label: '自然引导2', text: '需要财税合规建议的，思我一下吧' },
+  ]
+};
+
+// ============ GENERATION ENGINE ============
+
+function random(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+// 换一批状态追踪：确保每次切换不同内容块
+const lastBlockIndex = {};
+
+function pickDifferentIndex(ttype) {
+  const blocks = contentLibrary[ttype] || contentLibrary.lingjichu;
+  const total = blocks.length;
+  const last = lastBlockIndex[ttype];
+  let next;
+  if (total === 1) {
+    next = 0;
+  } else {
+    do { next = Math.floor(Math.random() * total); } while (next === last);
+  }
+  lastBlockIndex[ttype] = next;
+  return next;
+}
+
+function getAudience() {
+  const el = document.querySelector('#audienceGroup .tag-btn.selected');
+  return el ? el.dataset.value : 'xinren';
+}
+
+function generateTitles(city, ttype, blockIndex) {
+  const blocks = contentLibrary[ttype] || contentLibrary.lingjichu;
+  const block = blocks[blockIndex % blocks.length];
+  const titles = [];
+
+  const formulaMeta = [
+    { key: 'f1', label: '降低门槛', cls: 'fl-1' },
+    { key: 'f2', label: '数字清单', cls: 'fl-2' },
+    { key: 'f3', label: '情绪钩子', cls: 'fl-3' },
+    { key: 'f4', label: '时间锚点', cls: 'fl-4' },
+    { key: 'f5', label: '故事身份', cls: 'fl-5' },
+    { key: 'f6', label: '数字临界点', cls: 'fl-6' },
+    { key: 'f7', label: '提问互动', cls: 'fl-7' },
+  ];
+
+  formulaMeta.forEach(fm => {
+    const text = (block.titles && block.titles[fm.key]) || '';
+    if (text) titles.push({ formula: fm.label, cls: fm.cls, text });
+  });
+
+  return { titles, topic: block.topic };
+}
+
+function generateBody(city, ttype, audienceKey, extraInfo, blockIndex) {
+  const blocks = contentLibrary[ttype] || contentLibrary.lingjichu;
+  const block = blocks[blockIndex % blocks.length];
+  const aud = audienceLabels[audienceKey] || '零基础小白';
+
+  let body = block.body(city, aud);
+  body = body.replace(/\{city\}/g, city);
+
+  if (extraInfo && extraInfo.trim()) {
+    body += '\n\n顺便说一句：' + extraInfo.trim();
+  }
+
+  return formatBody(body);
+}
+
+function formatBody(text) {
+  text = text.replace(/\n{3,}/g, '\n\n');
+  text = text.replace(/^\n+/, '');
+  return text;
+}
+
+function generateTags(city, ttype) {
+  const tagMap = {
+    shicao: { core: ['做账流程','报税实操','会计分录'], hot: ['会计实操','会计干货','实用干货'], local: [`${city}会计培训`,`${city}仁和会计`], long: ['全盘账实操','做账报税'] },
+    zhuanhang: { core: ['转行会计','宝妈学会计','会计职业规划'], hot: ['转行日记','职业规划','个人成长'], local: [`${city}学会计`,`${city}仁和会计`], long: ['零基础转行','会计学习路线'] },
+    lingjichu: { core: ['零基础学会计','会计入门','小白学会计'], hot: ['会计干货','笔记灵感','实用干货'], local: [`${city}会计培训`,`${city}零基础学会计`], long: ['会计入门指南','会计学习路线'] },
+    ketang: { core: ['会计实操课','课堂实拍','会计培训'], hot: ['日常记录','今日分享','学习日常'], local: [`${city}仁和会计`,`${city}会计培训`], long: ['实操训练','会计技能'] },
+    zhaopin: { core: ['会计招聘','会计岗位','财务招聘'], hot: ['求职经验','职场干货','实用干货'], local: [`${city}招聘`,`${city}仁和会计`], long: ['会计助理招聘','新手可投'] },
+    mianshi: { core: ['会计面试','面试技巧','财务面试'], hot: ['面试干货','职场经验','实用干货'], local: [`${city}会计培训`,`${city}仁和会计`], long: ['会计面试题','面试准备'] },
+    kaozheng: { core: ['初级会计','中级会计','会计考证'], hot: ['备考日常','学习打卡','会计干货'], local: [`${city}会计培训`,`仁和会计`], long: ['考证规划','会计学习'] },
+    boss: { core: ['财税合规','税务筹划','老板财税'], hot: ['财税知识','企业管理','实用干货'], local: [`${city}财税`,`${city}仁和会计`], long: ['税务合规','财税风险'] },
+  };
+
+  const tm = tagMap[ttype] || tagMap.lingjichu;
+  const all = [
+    ...tm.core.map(t => ({ text: t, type: 'core' })),
+    ...tm.hot.map(t => ({ text: t, type: 'hot' })),
+    ...tm.local.map(t => ({ text: t, type: 'local' })),
+    ...tm.long.map(t => ({ text: t, type: 'long' })),
+  ];
+
+  // 去重
+  const seen = new Set();
+  return all.filter(t => { if(seen.has(t.text)) return false; seen.add(t.text); return true; });
+}
+
+function generateConversionHooks(city, ttype) {
+  const hooks = conversionHooks[ttype] || conversionHooks.lingjichu;
+  const selected = [...hooks].sort(() => Math.random() - 0.5).slice(0, 4);
+  return selected.map(h => ({
+    ...h,
+    text: h.text.replace(/\{city\}/g, city)
+  }));
+}
+
+function generateChecklist(city) {
+  return [
+    '标题里出现了具体人群吗？（零基础/宝妈/应届生/30岁/会计小白）',
+    '第一眼能看懂吗？有没有用大白话降低理解门槛？',
+    '有好奇心钩子吗？（数字/反问/对比/说实话）',
+    `有本地化元素吗？（城市=「${city}」已到位）`,
+    '正文结尾是自然互动而非硬性要求吗？（不出现"点赞收藏"等明示）',
+    '有没有触碰禁用词？（禁用：包过/保就业/保证/高薪无门槛/私信/微信）',
+    '封面建议：真实图片+一句话讲清痛点，不用海报模板',
+  ];
+}
+
+// ============ UI ============
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.tag-group').forEach(g => {
+    g.querySelectorAll('.tag-btn').forEach(b => {
+      b.addEventListener('click', () => {
+        g.querySelectorAll('.tag-btn').forEach(x => x.classList.remove('selected'));
+        b.classList.add('selected');
+      });
+    });
+  });
+});
+
+function generate() {
+  const city = document.getElementById('city').value.trim();
+  if (!city) { showToast('⚠️ 请先填写校区所在城市'); return; }
+  const ttype = document.getElementById('templateType').value;
+  const audienceKey = 'xinren';
+  const extraInfo = document.getElementById('extraInfo').value.trim();
+
+  const btn = document.getElementById('btnGen');
+  btn.disabled = true;
+  document.getElementById('loading').style.display = 'block';
+  document.getElementById('output').classList.remove('show');
+
+  const blockIndex = pickDifferentIndex(ttype);
+  setTimeout(() => {
+    const { titles, topic } = generateTitles(city, ttype, blockIndex);
+    const body = generateBody(city, ttype, audienceKey, extraInfo, blockIndex);
+    const tags = generateTags(city, ttype);
+    const convHooks = generateConversionHooks(city, ttype);
+    const checklist = generateChecklist(city);
+
+    // Render titles
+    document.getElementById('titleOutput').innerHTML = titles.map(t => `
+      <div class="title-block">
+        <span class="formula-label ${t.cls}">${t.formula}</span>
+        <span class="t-text" onclick="copyText('${t.text.replace(/'/g, "\\'")}')" title="点击复制">${t.text}</span>
+      </div>
+    `).join('');
+
+    // Render body
+    document.getElementById('bodyOutput').textContent = body;
+
+    // Render tags
+    const tagHtml = tags.map(t => {
+      let cls = 'tag-chip';
+      if (t.type === 'hot') cls += ' hot';
+      if (t.type === 'local') cls += ' local';
+      if (t.type === 'long') cls += ' long';
+      return `<span class="${cls}">#${t.text}</span>`;
+    }).join(' ');
+    document.getElementById('tagOutput').innerHTML = `
+      <div class="tag-label">全部标签（共${tags.length}个）</div>
+      <div class="tag-row">${tagHtml}</div>
+    `;
+
+    // Render conversion hooks
+    document.getElementById('convOutput').innerHTML = convHooks.map(h => `
+      <div class="conv-item" onclick="copyText('${h.text.replace(/'/g, "\'")}', 'conv')" title="点击复制">
+        <div class="cv-label">${h.label}</div>
+        <div>${h.text}</div>
+      </div>
+    `).join('');
+
+    // Render checklist
+    document.getElementById('checklistOutput').innerHTML = checklist.map(c =>
+      `<li>${c}</li>`
+    ).join('');
+
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('output').classList.add('show');
+    btn.disabled = false;
+    document.getElementById('output').scrollIntoView({ behavior: 'smooth' });
+    showToast('✅ 生成完成！');
+  }, 500);
+}
+
+function escapeJs(str) {
+  return str.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n');
+}
+
+function copyText(text, type) {
+  type = type || 'title';
+  var msg = type === 'conv' ? '✅ 话术已复制' : '✅ 标题已复制';
+  var ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0;width:1px;height:1px;pointer-events:none;';
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  try {
+    document.execCommand('copy');
+    showToast(msg);
+  } catch(e) {
+    showToast('复制失败');
+  }
+  document.body.removeChild(ta);
+}
+
+function copySection(cardId) {
+  const card = document.getElementById(cardId);
+  navigator.clipboard.writeText(card.innerText.trim()).then(() => showToast('✅ 已复制'));
+}
+
+function copyBody() {
+  const text = document.getElementById('bodyOutput').textContent;
+  navigator.clipboard.writeText(text).then(() => showToast('✅ 正文已复制'));
+}
+
+function copyTags() {
+  const tags = Array.from(document.querySelectorAll('#tagOutput .tag-chip')).map(e => e.textContent).join(' ');
+  navigator.clipboard.writeText(tags).then(() => showToast('✅ 标签已复制'));
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('show'), 2000);
+}
+</script>
+</body>
+</html>
